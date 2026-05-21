@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat - Pondok Pesantren Al Kautsar</title>
+    <style>
+        body { font-family: Arial; background: #f0f2f5; padding: 20px; }
+        .container { max-width: 700px; margin: auto; background: white; padding: 20px; border-radius: 16px; }
+        h2 { text-align: center; color: #1e2a47; }
+        #login-area, #chat-area { display: none; }
+        .visible { display: block !important; }
+        input, textarea { width: 100%; padding: 10px; margin: 10px 0; border-radius: 20px; border: 1px solid #ccc; }
+        button { background: #1e2a47; color: white; border: none; padding: 10px 20px; border-radius: 30px; cursor: pointer; }
+        .message { background: #f8f9fa; margin-bottom: 12px; padding: 8px 15px; border-radius: 20px; }
+        #message-box { height: 400px; overflow-y: auto; border: 1px solid #eee; padding: 10px; border-radius: 12px; margin-bottom: 15px; }
+        .logout-btn { background: #e67e22; float: right; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>💬 Pondok Pesantren Al Kautsar</h2>
+    <div id="login-area" class="visible">
+        <h3>Masuk / Daftar</h3>
+        <input type="text" id="username" placeholder="Username (nama santri)">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="register()">Daftar</button>
+        <button onclick="login()" style="background:#e67e22;">Masuk</button>
+        <p id="login-message" style="color:red;"></p>
+    </div>
+    <div id="chat-area">
+        <div style="overflow:auto; margin-bottom:15px;">
+            <span id="user-name"></span>
+            <button class="logout-btn" onclick="logout()">Keluar</button>
+        </div>
+        <div id="message-box"></div>
+        <textarea id="message-input" placeholder="Tulis pesan..."></textarea>
+        <button onclick="sendMessage()">Kirim Pesan</button>
+    </div>
+</div>
+<script src="https://unpkg.com/parse@3.4.0/dist/parse.min.js"></script>
+<script>
+    Parse.initialize("PUkWc1q1w6G9LObKVAM8vaZysalll29RGM6hUsCN", "4NIfLUey7lyjTDu6q5XUCsKt4Gkee73z1uI8WYH0");
+    Parse.serverURL = 'https://parseapi.back4app.com/';
+    let currentUser = null;
+    async function register() {
+        let username = document.getElementById('username').value.trim();
+        let password = document.getElementById('password').value;
+        if (!username || !password) return alert('Isi semua');
+        let user = new Parse.User();
+        user.set('username', username);
+        user.set('password', password);
+        try {
+            await user.signUp();
+            document.getElementById('login-message').innerHTML = 'Pendaftaran berhasil! Silakan login.';
+        } catch (err) {
+            document.getElementById('login-message').innerHTML = 'Error: ' + err.message;
+        }
+    }
+    async function login() {
+        let username = document.getElementById('username').value.trim();
+        let password = document.getElementById('password').value;
+        try {
+            let user = await Parse.User.logIn(username, password);
+            currentUser = user;
+            document.getElementById('login-area').style.display = 'none';
+            document.getElementById('chat-area').style.display = 'block';
+            document.getElementById('user-name').innerHTML = '👤 ' + user.get('username');
+            await loadMessages();
+        } catch (err) {
+            document.getElementById('login-message').innerHTML = 'Login gagal: ' + err.message;
+        }
+    }
+    async function logout() {
+        await Parse.User.logOut();
+        currentUser = null;
+        document.getElementById('chat-area').style.display = 'none';
+        document.getElementById('login-area').style.display = 'block';
+        document.getElementById('username').value = '';
+        document.getElementById('password').value = '';
+        document.getElementById('login-message').innerHTML = '';
+    }
+    async function sendMessage() {
+        let text = document.getElementById('message-input').value.trim();
+        if (!text) return;
+        let Message = Parse.Object.extend('Message');
+        let msg = new Message();
+        msg.set('username', currentUser.get('username'));
+        msg.set('text', text);
+        await msg.save();
+        document.getElementById('message-input').value = '';
+    }
+    async function loadMessages() {
+        let Message = Parse.Object.extend('Message');
+        let query = new Parse.Query(Message);
+        query.ascending('createdAt');
+        let results = await query.find();
+        displayMessages(results);
+        subscribeToNewMessages();
+    }
+    function displayMessages(messages) {
+        let container = document.getElementById('message-box');
+        container.innerHTML = '';
+        messages.forEach(msg => {
+            let div = document.createElement('div');
+            div.className = 'message';
+            let waktu = new Date(msg.createdAt).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+            div.innerHTML = `<strong>${escapeHtml(msg.get('username'))}</strong> <small>${waktu}</small><br>${escapeHtml(msg.get('text'))}`;
+            container.appendChild(div);
+        });
+        container.scrollTop = container.scrollHeight;
+    }
+    function subscribeToNewMessages() {
+        let Message = Parse.Object.extend('Message');
+        let query = new Parse.Query(Message);
+        let subscription = query.subscribe();
+        subscription.on('create', (message) => {
+            let container = document.getElementById('message-box');
+            let div = document.createElement('div');
+            div.className = 'message';
+            let waktu = new Date(message.createdAt).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+            div.innerHTML = `<strong>${escapeHtml(message.get('username'))}</strong> <small>${waktu}</small><br>${escapeHtml(message.get('text'))}`;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        });
+    }
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    window.onload = async () => {
+        let user = Parse.User.current();
+        if (user) {
+            currentUser = user;
+            document.getElementById('login-area').style.display = 'none';
+            document.getElementById('chat-area').style.display = 'block';
+            document.getElementById('user-name').innerHTML = '👤 ' + user.get('username');
+            await loadMessages();
+        }
+    };
+</script>
+</body>
+</html>
