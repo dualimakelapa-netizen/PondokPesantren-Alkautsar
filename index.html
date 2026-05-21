@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Ponpes Al Kautsar - Digital Pesantren</title>
+    
+    <!-- Google Fonts - Amiri untuk nuansa Islami -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Parse SDK -->
+    <script src="https://unpkg.com/parse@3.4.0/dist/parse.min.js"></script>
+    <style>
+        :root {
+            /* Warna Utama Tema Islami Mewah */
+            --primary-green: #0d6e4b;
+            --dark-green: #094d35;
+            --gold: #d4af37;
+            --light-gold: #f4e4bc;
+            --deep-gold: #b8960c;
+            --navy-dark: #0a1628;
+            --navy-medium: #152238;
+            --burgundy: #722F37;
+            --cream: #faf8f5;
+            --ivory: #fffef9;
+            --text-dark: #1a2f2a;
+            --text-light: #e8e4d9;
+            --card-bg: rgba(255, 254, 249, 0.95);
+            --overlay-dark: rgba(10, 22, 40, 0.85);
+            --success-green: #10b981;
+            --border-gold: rgba(212, 175, 55, 0.3);
+            
+            /* Tipografi */
+            --font-heading: 'Amiri', 'Scheherazade New', serif;
+            --font-body: 'Segoe UI', 'Roboto', system-ui, sans-serif;
+            
+            /* Bayangan */
+            --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.12);
+            --shadow-gold-glow: 0 0 20px rgba(212, 175, 55, 0.3);
+            --shadow-luxury: 0 20px 60px rgba(0, 0, 0, 0.25);
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: var(--font-body); 
+        }
+
+        body {
+            /* Background gradient Islami dengan pola geometris */
+            background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy-medium) 50%, #0d1f35 100%);
+            min-height: 100vh;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Pola Geometris Islami subtle di background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 20px,
+                    rgba(212, 175, 55, 0.02) 20px,
+                    rgba(212, 175, 55, 0.02) 21px
+                ),
+                repeating-linear-gradient(
+                    -45deg,
+                    transparent,
+                    transparent 20px,
+                    rgba(13, 110, 75, 0.02) 20px,
+                    rgba(13, 110, 75, 0.02) 21px
+                );
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Container utama dengan frame mewah */
+        .app-container {
+            max-width: 850px;
+            width: 100%;
+            margin: 0 auto;
+            background: linear-gradient(145deg, var(--ivory) 0%, var(--cream) 100%);
+            border-radius: 1.5rem;
+            box-shadow: var(--shadow-luxury), 0 0 0 1px var(--border-gold);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+            position: relative;
+            z-index: 1;
+        }
+        @media (max-width: 600px) {
+            .app-container { 
+                height: 100vh; 
+                border-radius: 0; 
+                box-shadow: none;
+            }
+            body { padding: 0; }
+        }
+
+        /* HEADER - Tema Islami Mewah */
+        .header {
+            background: linear-gradient(135deg, var(--navy-dark) 0%, var(--dark-green) 100%);
+            padding: 1.2rem 1.8rem;
+            border-bottom: 3px solid var(--gold);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Ornamental gold pattern di bawah header */
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                var(--gold) 20%, 
+                var(--deep-gold) 50%, 
+                var(--gold) 80%, 
+                transparent 100%
+            );
+        }
+
+        .logo h1 { 
+            font-family: var(--font-heading); 
+            font-size: 1.6rem; 
+            color: var(--light-gold); 
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            letter-spacing: 0.5px;
+        }
+        .logo p { 
+            font-size: 0.75rem; 
+            color: var(--light-gold); 
+            font-weight: 600; 
+            margin: 0;
+            opacity: 0.9;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        
+        .user-info { 
+            display: flex; 
+            gap: 12px; 
+            align-items: center; 
+            background: rgba(255, 255, 255, 0.1); 
+            padding: 6px 18px; 
+            border-radius: 30px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        .user-info span { 
+            font-weight: 600; 
+            color: var(--ivory); 
+            font-size: 0.9rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .role-badge { 
+            background: linear-gradient(135deg, var(--gold) 0%, var(--deep-gold) 100%); 
+            color: var(--navy-dark); 
+            padding: 5px 12px; 
+            border-radius: 15px; 
+            font-size: 0.7rem; 
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(212, 175, 55, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .logout-btn { 
+            background: transparent; 
+            border: 1px solid var(--gold); 
+            color: var(--light-gold); 
+            font-weight: 600; 
+            cursor: pointer; 
+            font-size: 0.8rem;
+            padding: 5px 12px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+        .logout-btn:hover {
+            background: var(--gold);
+            color: var(--navy-dark);
+        }
+
+        /* MENU TABS - Navigasi Islami Elegan */
+        .menu-tabs {
+            display: flex;
+            background: linear-gradient(180deg, rgba(21, 34, 56, 0.95) 0%, rgba(13, 31, 53, 0.98) 100%);
+            padding: 0 1.2rem;
+            gap: 0.3rem;
+            border-bottom: 2px solid var(--border-gold);
+            overflow-x: auto;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        /* Subtle pattern overlay pada menu */
+        .menu-tabs::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 30px,
+                rgba(212, 175, 55, 0.02) 30px,
+                rgba(212, 175, 55, 0.02) 31px
+            );
+            pointer-events: none;
+        }
+
+        .tab {
+            padding: 1rem 1.3rem;
+            font-weight: 600;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+            position: relative;
+            font-size: 0.9rem;
+            letter-spacing: 0.3px;
+            z-index: 1;
+        }
+
+        .tab:hover {
+            color: var(--light-gold);
+            background: rgba(212, 175, 55, 0.08);
+        }
+
+        .tab.active { 
+            color: var(--gold); 
+            border-bottom-color: var(--gold);
+            background: rgba(212, 175, 55, 0.1);
+            font-weight: 700;
+        }
+
+        /* Gold glow effect untuk tab aktif */
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 2px;
+            background: var(--gold);
+            box-shadow: 0 0 10px var(--gold);
+        }
+
+        /* CONTENT AREA - Latar Islami Elegan */
+        .content {
+            flex: 1;
+            padding: 2rem;
+            background: linear-gradient(180deg, var(--cream) 0%, var(--ivory) 100%);
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Subtle Islamic pattern di content area */
+        .content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(212, 175, 55, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(13, 110, 75, 0.03) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .page { 
+            display: none; 
+            animation: fadeInIslamic 0.4s ease; 
+            height: 100%; 
+            flex-direction: column; 
+            position: relative;
+            z-index: 1;
+        }
+        .page.active-page { display: flex; }
+        
+        @keyframes fadeInIslamic { 
+            from { 
+                opacity: 0; 
+                transform: translateY(10px) scale(0.98);
+            } 
+            to { 
+                opacity: 1; 
+                transform: translateY(0) scale(1);
+            } 
+        }
+
+        /* AUTH FORMS - Desain Mewah Islami */
+        .auth-container { 
+            max-width: 420px; 
+            margin: 50px auto; 
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Decorative Islamic ornament untuk auth container */
+        .auth-container::before {
+            content: '☪';
+            font-size: 3rem;
+            color: var(--gold);
+            opacity: 0.15;
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .form-group { 
+            margin-bottom: 1.3rem; 
+            text-align: left;
+            position: relative;
+        }
+
+        label { 
+            display: block; 
+            font-weight: 600; 
+            margin-bottom: 0.5rem; 
+            color: var(--text-dark); 
+            font-size: 0.9rem;
+            letter-spacing: 0.3px;
+        }
+
+        input, select, textarea {
+            width: 100%; 
+            padding: 0.85rem 1.2rem; 
+            border: 2px solid rgba(13, 110, 75, 0.2); 
+            border-radius: 12px; 
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--text-dark);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15), var(--shadow-soft);
+            background: white;
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: #94a3b8;
+            font-style: italic;
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--dark-green) 100%); 
+            color: white; 
+            border: none; 
+            padding: 0.9rem 1.8rem; 
+            border-radius: 12px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            width: 100%;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(13, 110, 75, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Gold shimmer effect pada tombol */
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent
+            );
+            transition: left 0.5s ease;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 25px rgba(13, 110, 75, 0.4), var(--shadow-gold-glow);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary { 
+            background: linear-gradient(135deg, var(--gold) 0%, var(--deep-gold) 100%); 
+            color: var(--navy-dark);
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 6px 25px rgba(212, 175, 55, 0.5), var(--shadow-gold-glow);
+        }
+        
+        /* Dashboard Cards - Widget Mewah Islami */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.3rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(145deg, var(--ivory) 0%, var(--cream) 100%);
+            border-radius: 1.2rem;
+            padding: 1.5rem 1.2rem;
+            text-align: center;
+            box-shadow: var(--shadow-medium);
+            border: 2px solid var(--border-gold);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        /* Gold ornamental corner decoration */
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gold), var(--deep-gold), var(--gold));
+        }
+
+        /* Subtle pattern overlay */
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+            transition: all 0.4s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: var(--shadow-luxury), var(--shadow-gold-glow);
+            border-color: var(--gold);
+        }
+
+        .stat-card:hover::after {
+            top: -30%;
+            right: -30%;
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            display: block;
+            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.1));
+        }
+
+        .stat-card h3 {
+            font-family: var(--font-heading);
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark-green);
+            margin: 0.7rem 0 0.4rem 0;
+            position: relative;
+            z-index: 1;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card p {
+            color: var(--text-dark);
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin: 0;
+            opacity: 0.85;
+            position: relative;
+            z-index: 1;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+
+        /* CHAT - Tema Islami Emerald & Gold */
+        .chat-wrapper { 
+            display: flex; 
+            flex-direction: column; 
+            height: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        .chat-box { 
+            flex: 1;
+            background: linear-gradient(180deg, rgba(248, 250, 252, 0.5) 0%, rgba(255, 254, 249, 0.8) 100%);
+            border-radius: 1.5rem;
+            padding: 1.3rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border: 2px solid var(--border-gold);
+            box-shadow: var(--shadow-soft);
+            position: relative;
+        }
+
+        /* Subtle pattern di chat box */
+        .chat-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(circle at 2px 2px, rgba(212, 175, 55, 0.03) 2px, transparent 2px);
+            background-size: 30px 30px;
+            pointer-events: none;
+            border-radius: inherit;
+        }
+
+        .msg-row { 
+            display: flex; 
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        .msg-row.me { 
+            justify-content: flex-end; 
+        }
+
+        .msg-row.other { 
+            justify-content: flex-start; 
+        }
+
+        .msg-bubble { 
+            max-width: 75%; 
+            padding: 12px 18px; 
+            border-radius: 20px; 
+            position: relative; 
+            word-wrap: break-word; 
+            font-size: 14px; 
+            line-height: 1.5;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s ease;
+        }
+
+        .msg-bubble:hover {
+            transform: scale(1.02);
+        }
+
+        /* Pesan sendiri - tema hijau emerald Islami */
+        .msg-row.me .msg-bubble { 
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--dark-green) 100%); 
+            color: white; 
+            border-bottom-right-radius: 6px;
+            border: 1px solid rgba(13, 110, 75, 0.3);
+        }
+
+        /* Pesan orang lain - tema cream/gold */
+        .msg-row.other .msg-bubble { 
+            background: linear-gradient(135deg, var(--ivory) 0%, white 100%); 
+            color: var(--text-dark); 
+            border-bottom-left-radius: 6px; 
+            border: 2px solid var(--border-gold);
+        }
+
+        .msg-info { 
+            font-size: 10px; 
+            display: block; 
+            margin-top: 6px; 
+            opacity: 0.7; 
+            text-align: right;
+            font-weight: 500;
+        }
+
+        .msg-sender { 
+            font-family: var(--font-heading);
+            font-weight: 700; 
+            font-size: 12px; 
+            display: block; 
+            margin-bottom: 4px; 
+            color: var(--dark-green);
+            letter-spacing: 0.3px;
+        }
+
+        .chat-input-area { 
+            margin-top: 1.2rem; 
+            display: flex; 
+            gap: 12px; 
+            align-items: flex-end;
+            position: relative;
+            z-index: 1;
+        }
+
+        .chat-input-area textarea { 
+            resize: none; 
+            height: 50px; 
+            border-radius: 25px; 
+            margin: 0;
+            border: 2px solid var(--border-gold);
+            padding: 12px 20px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .chat-input-area textarea:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+        }
+
+        .chat-input-area button { 
+            width: auto; 
+            padding: 12px 28px; 
+            border-radius: 25px;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--deep-gold) 100%);
+            color: var(--navy-dark);
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .chat-input-area button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5), var(--shadow-gold-glow);
+        }
+
+        /* INFAK & PENGUMUMAN - Kartu Formulir Mewah */
+        .form-card { 
+            background: linear-gradient(135deg, #fffef9 0%, var(--light-gold) 100%); 
+            padding: 1.8rem; 
+            border-radius: 1.5rem; 
+            border: 2px solid var(--border-gold); 
+            margin-bottom: 1.8rem;
+            box-shadow: var(--shadow-soft);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Gold accent line di atas form card */
+        .form-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 20%;
+            width: 60%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+
+        .infak-item { 
+            background: linear-gradient(135deg, var(--ivory) 0%, var(--cream) 100%); 
+            padding: 1rem 1.3rem; 
+            border-radius: 1rem; 
+            margin-bottom: 0.7rem; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            border-left: 4px solid var(--gold);
+            border: 2px solid var(--border-gold);
+            border-left: 5px solid var(--gold);
+            box-shadow: var(--shadow-soft);
+            transition: all 0.3s ease;
+        }
+
+        .infak-item:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow-medium);
+            border-color: var(--gold);
+        }
+
+        .pengumuman-card { 
+            background: linear-gradient(135deg, var(--ivory) 0%, white 100%); 
+            border-left: 5px solid var(--gold); 
+            padding: 1.3rem; 
+            border-radius: 1rem; 
+            margin-bottom: 1.2rem; 
+            box-shadow: var(--shadow-medium);
+            border: 2px solid var(--border-gold);
+            border-left: 5px solid var(--gold);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pengumuman-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--gold), var(--deep-gold), var(--gold));
+        }
+
+        .pengumuman-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-luxury), var(--shadow-gold-glow);
+        }
+
+        .empty { 
+            text-align: center; 
+            color: var(--text-dark); 
+            padding: 3rem 2rem; 
+            font-size: 1rem;
+            opacity: 0.7;
+            font-style: italic;
+            position: relative;
+        }
+
+        /* Decorative element untuk empty state */
+        .empty::before {
+            content: '📜';
+            display: block;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.4;
+        }
+
+        .alert { 
+            padding: 1rem 1.3rem; 
+            border-radius: 12px; 
+            margin-bottom: 1rem; 
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); 
+            color: #991b1b; 
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-left: 4px solid var(--burgundy);
+            box-shadow: var(--shadow-soft);
+            animation: slideInAlert 0.3s ease;
+        }
+
+        @keyframes slideInAlert {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* FOOTER - Elegan Islami */
+        footer { 
+            text-align: center; 
+            font-size: 0.8rem; 
+            padding: 1.2rem; 
+            background: linear-gradient(135deg, var(--navy-dark) 0%, var(--dark-green) 100%);
+            color: var(--light-gold); 
+            border-top: 3px solid var(--gold);
+            flex-shrink: 0;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Ornamental pattern di footer */
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 15px,
+                rgba(212, 175, 55, 0.03) 15px,
+                rgba(212, 175, 55, 0.03) 16px
+            );
+            pointer-events: none;
+        }
+
+        /* Custom Scrollbar - Tema Gold Islami */
+        ::-webkit-scrollbar { 
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track { 
+            background: rgba(248, 244, 232, 0.5);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb { 
+            background: linear-gradient(180deg, var(--gold) 0%, var(--deep-gold) 100%);
+            border-radius: 10px;
+            border: 2px solid var(--cream);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, var(--deep-gold) 0%, var(--gold) 100%);
+        }
+    </style>
+</head>
+<body>
+<div class="app-container" id="appRoot">
+    
+    <!-- HEADER (muncul setelah login) -->
+    <div class="header" id="header" style="display: none;">
+        <div class="logo">
+            <h1>🏫 Al Kautsar</h1>
+            <p>Sistem Informasi Pesantren</p>
+        </div>
+        <div class="user-info">
+            <span id="userName">User</span>
+            <span class="role-badge" id="userRole">Role</span>
+            <button class="logout-btn" id="logoutBtn">Keluar</button>
+        </div>
+    </div>
+
+    <!-- HALAMAN LOGIN/REGISTER -->
+    <div id="authSection" class="content">
+        <div class="auth-container">
+            <h2 style="font-family: var(--font-heading); color: var(--dark-green); margin-bottom: 0.5rem; font-size: 2.2rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.05);">☪ Al Kautsar</h2>
+            <p style="color: var(--text-dark); margin-bottom: 2rem; font-style: italic; opacity: 0.8;">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>
+            <p style="color: #64748b; margin-bottom: 2rem; font-size: 0.95rem;">Silakan masuk akun Anda</p>
+            <div id="loginPanel">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="loginUsername" placeholder="Username">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" placeholder="Password">
+                </div>
+                <button id="doLoginBtn">Masuk Dashboard</button>
+                <p style="text-align: center; margin-top: 1rem; font-size: 0.9rem;">
+                    Belum punya akun? <a href="#" id="showRegisterLink" style="color:var(--gold); text-decoration:none; font-weight:bold;">Daftar</a>
+                </p>
+                <div id="loginError" class="alert" style="display: none;"></div>
+            </div>
+            <div id="registerPanel" style="display: none;">
+                <div class="form-group">
+                    <label>Nama Lengkap</label>
+                    <input type="text" id="regName">
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="regRole">
+                        <option value="wali_santri">👨‍👩‍👧 Wali Santri</option>
+                        <option value="masul_mudarris">👨‍🏫 Mas'ul / Mudarris</option>
+                        <option value="admin_murobbi">👩‍💼 Admin / Murobbi</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="regUsername">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="regPassword">
+                </div>
+                <button class="btn-secondary" id="doRegisterBtn">Daftar Akun</button>
+                <p style="text-align: center; margin-top: 1rem; font-size: 0.9rem;">
+                    Sudah punya akun? <a href="#" id="showLoginLink" style="color:var(--primary-green); text-decoration:none; font-weight:bold;">Masuk</a>
+                </p>
+                <div id="regError" class="alert" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD SETELAH LOGIN -->
+    <div id="dashboardSection" style="display: none; flex: 1; display: flex; flex-direction: column;">
+        <div class="menu-tabs" id="menuTabs"></div>
+        <div class="content">
+            <!-- Page 0: Home (Dashboard Statistik) -->
+            <div id="homePage" class="page">
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <h3 id="totalSantri">0</h3>
+                        <p>Jumlah Santri</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <h3 id="totalInfak">Rp 0</h3>
+                        <p>Total Infak Terkumpul</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📢</div>
+                        <h3 id="totalPengumuman">0</h3>
+                        <p>Pengumuman</p>
+                    </div>
+                </div>
+                <!-- Kotak infak bulan ini / ringkasan -->
+                <div class="form-card" style="margin-top: 0.5rem;">
+                    <h3 style="margin-bottom:0.5rem;">📊 Ringkasan Infak Bulan Ini</h3>
+                    <div id="ringkasanInfakBulanIni">Memuat...</div>
+                </div>
+                <p style="text-align:center; font-size:0.8rem; color:#64748b;">⬇️ Pilih menu di atas untuk membuka fitur lengkap</p>
+            </div>
+
+            <!-- Page 1: Chat -->
+            <div id="chatPage" class="page">
+                <div class="chat-wrapper">
+                    <div class="chat-box" id="chatMessages"></div>
+                    <div class="chat-input-area">
+                        <textarea id="chatInput" placeholder="Tulis pesan..." rows="1"></textarea>
+                        <button id="sendChatBtn">Kirim</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 2: Infak -->
+            <div id="infakPage" class="page">
+                <div class="form-card">
+                    <h3>💰 Form Infak Bulanan</h3>
+                    <div class="form-group">
+                        <label>Bulan</label>
+                        <input type="month" id="infakBulan">
+                    </div>
+                    <div class="form-group">
+                        <label>Nominal (Rp)</label>
+                        <input type="number" id="infakNominal" placeholder="Contoh: 100000">
+                    </div>
+                    <button class="btn-secondary" id="submitInfakBtn">Simpan Infak</button>
+                    <div id="infakMessage" style="margin-top:10px;"></div>
+                </div>
+                <h4>Riwayat Infak Saya</h4>
+                <div id="infakRiwayat"></div>
+            </div>
+
+            <!-- Page 3: Pengumuman -->
+            <div id="pengumumanPage" class="page">
+                <div style="background:linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding:1.5rem; border-radius:1.5rem; margin-bottom:1.5rem; border:2px solid rgba(59, 130, 246, 0.2);">
+                    <h3>📢 Buat Pengumuman</h3>
+                    <div class="form-group">
+                        <label>Judul</label>
+                        <input type="text" id="annTitle" placeholder="Contoh: Hafalan Juz 30">
+                    </div>
+                    <div class="form-group">
+                        <label>Isi Pengumuman</label>
+                        <textarea id="annDesc" rows="2" placeholder="Detail informasi..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Tampilkan Kepada</label>
+                        <select id="annTarget">
+                            <option value="all">Semua Pengguna</option>
+                            <option value="me">Hanya Saya (Testing)</option>
+                        </select>
+                    </div>
+                    <button id="createAnnouncementBtn" style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%);">Kirim Pengumuman</button>
+                    <div id="annMessage" style="margin-top:10px;"></div>
+                </div>
+                <h4>Papan Pengumuman</h4>
+                <div id="announcementList"></div>
+            </div>
+        </div>
+        <footer>Al Kautsar — Silaturahmi Digital | © 2026</footer>
+    </div>
+</div>
+
+<script>
+    Parse.initialize("PUkWc1q1w6G9LObKVAM8vaZysalll29RGM6hUsCN", "rYurvOuqkeJzJZfT1Tq1X5UmbSQHC6StID85xCu7");
+    Parse.serverURL = "https://parseapi.back4app.com/";
+
+    let currentUser = null;
+
+    // DOM elements
+    const authSection = document.getElementById('authSection');
+    const dashboardSection = document.getElementById('dashboardSection');
+    const header = document.getElementById('header');
+    const loginPanel = document.getElementById('loginPanel');
+    const registerPanel = document.getElementById('registerPanel');
+
+    // Helper
+    function showError(divId, msg) {
+        const div = document.getElementById(divId);
+        div.innerText = msg;
+        div.style.display = 'block';
+        setTimeout(() => div.style.display = 'none', 4000);
+    }
+
+    // Register
+    document.getElementById('doRegisterBtn').addEventListener('click', async () => {
+        const name = document.getElementById('regName').value.trim();
+        const role = document.getElementById('regRole').value;
+        const username = document.getElementById('regUsername').value.trim();
+        const password = document.getElementById('regPassword').value;
+        if (!name || !username || !password) return showError('regError', 'Semua field harus diisi');
+        if (password.length < 6) return showError('regError', 'Password minimal 6 karakter');
+        const user = new Parse.User();
+        user.set('username', username);
+        user.set('password', password);
+        user.set('name', name);
+        user.set('role', role);
+        try {
+            await user.signUp();
+            alert('Pendaftaran berhasil! Silakan login.');
+            document.getElementById('showLoginLink').click();
+        } catch(err) { showError('regError', err.message); }
+    });
+
+    // Login
+    document.getElementById('doLoginBtn').addEventListener('click', async () => {
+        const username = document.getElementById('loginUsername').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        if (!username || !password) return showError('loginError', 'Isi username dan password');
+        try {
+            const user = await Parse.User.logIn(username, password);
+            currentUser = user;
+            showDashboard();
+        } catch(err) { showError('loginError', err.message); }
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await Parse.User.logOut();
+        location.reload();
+    });
+
+    document.getElementById('showRegisterLink').addEventListener('click', (e) => { e.preventDefault(); loginPanel.style.display='none'; registerPanel.style.display='block'; });
+    document.getElementById('showLoginLink').addEventListener('click', (e) => { e.preventDefault(); registerPanel.style.display='none'; loginPanel.style.display='block'; });
+
+    // Dashboard
+    async function showDashboard() {
+        authSection.style.display = 'none';
+        dashboardSection.style.display = 'flex';
+        header.style.display = 'flex';
+        const user = Parse.User.current();
+        document.getElementById('userName').innerText = user.get('name') || user.get('username');
+        const role = user.get('role');
+        let roleText = 'Santri';
+        if (role === 'wali_santri') roleText = 'Wali Santri';
+        else if (role === 'masul_mudarris') roleText = 'Mas\'ul / Mudarris';
+        else if (role === 'admin_murobbi') roleText = 'Admin / Murobbi';
+        document.getElementById('userRole').innerText = roleText;
+
+        setupTabs();
+        await loadDashboardStats();
+        await loadChat();
+        await loadInfak();
+        await loadPengumuman();
+    }
+
+    function setupTabs() {
+        const container = document.getElementById('menuTabs');
+        container.innerHTML = '';
+        const menus = [
+            { id: 'homePage', name: '🏠 Beranda' },
+            { id: 'chatPage', name: '💬 Chat Forum' },
+            { id: 'infakPage', name: '💰 Infak' },
+            { id: 'pengumumanPage', name: '📢 Pengumuman' }
+        ];
+        menus.forEach((menu, idx) => {
+            const tab = document.createElement('div');
+            tab.className = 'tab' + (idx === 0 ? ' active' : '');
+            tab.innerText = menu.name;
+            tab.onclick = () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+                document.getElementById(menu.id).classList.add('active-page');
+                if (menu.id === 'homePage') loadDashboardStats();
+            };
+            container.appendChild(tab);
+        });
+        document.getElementById('homePage').classList.add('active-page');
+    }
+
+    // Statistik dashboard
+    async function loadDashboardStats() {
+        try {
+            // Hitung jumlah santri (role = wali_santri)
+            const userQuery = new Parse.Query(Parse.User);
+            userQuery.equalTo('role', 'wali_santri');
+            const santriCount = await userQuery.count();
+
+            // Total infak (semua infak)
+            const Infak = Parse.Object.extend('Infak');
+            const infakQuery = new Parse.Query(Infak);
+            const allInfak = await infakQuery.find();
+            let totalInfak = 0;
+            allInfak.forEach(inf => { totalInfak += inf.get('nominal'); });
+
+            // Total pengumuman (semua)
+            const Announcement = Parse.Object.extend('Announcement');
+            const annQuery = new Parse.Query(Announcement);
+            const annCount = await annQuery.count();
+
+            // Ringkasan infak bulan ini
+            const now = new Date();
+            const bulanIni = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+            const infakBulanIniQuery = new Parse.Query(Infak);
+            infakBulanIniQuery.equalTo('bulan', bulanIni);
+            const infakBulanIni = await infakBulanIniQuery.find();
+            let totalBulanIni = 0;
+            infakBulanIni.forEach(inf => { totalBulanIni += inf.get('nominal'); });
+
+            // Update DOM
+            document.getElementById('totalSantri').innerText = santriCount;
+            document.getElementById('totalInfak').innerHTML = `Rp ${totalInfak.toLocaleString('id-ID')}`;
+            document.getElementById('totalPengumuman').innerText = annCount;
+            const ringkasanDiv = document.getElementById('ringkasanInfakBulanIni');
+            ringkasanDiv.innerHTML = `<p style="font-size:1.2rem; font-weight:bold; margin:0;">Rp ${totalBulanIni.toLocaleString('id-ID')}</p>
+                                      <p style="margin:0; font-size:0.8rem;">dari ${infakBulanIni.length} santri</p>`;
+        } catch(e) { console.error(e); }
+    }
+
+    // === CHAT ===
+    async function loadChat() {
+        const Message = Parse.Object.extend('Message');
+        const query = new Parse.Query(Message);
+        query.ascending('createdAt');
+        query.limit(100);
+        try {
+            const results = await query.find();
+            renderChat(results);
+            subscribeChat();
+        } catch(e) { console.error(e); }
+    }
+
+    function renderChat(messages) {
+        const container = document.getElementById('chatMessages');
+        container.innerHTML = '';
+        messages.forEach(m => appendChatMessage(m));
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function appendChatMessage(msg) {
+        const container = document.getElementById('chatMessages');
+        const user = Parse.User.current();
+        const isMe = msg.get('username') === user.get('username');
+        const waktu = new Date(msg.createdAt).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+        const row = document.createElement('div');
+        row.className = isMe ? 'msg-row me' : 'msg-row other';
+        let html = '';
+        if (!isMe) html += `<span class="msg-sender">${escapeHtml(msg.get('username'))}</span>`;
+        html += `${escapeHtml(msg.get('text'))}`;
+        html += `<span class="msg-info">${waktu}</span>`;
+        row.innerHTML = `<div class="msg-bubble">${html}</div>`;
+        container.appendChild(row);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function subscribeChat() {
+        const Message = Parse.Object.extend('Message');
+        const query = new Parse.Query(Message);
+        query.subscribe().on('create', (msg) => { appendChatMessage(msg); });
+    }
+
+    document.getElementById('sendChatBtn').addEventListener('click', sendMessage);
+    document.getElementById('chatInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    });
+
+    async function sendMessage() {
+        const input = document.getElementById('chatInput');
+        const text = input.value.trim();
+        if (!text) return;
+        const user = Parse.User.current();
+        const Message = Parse.Object.extend('Message');
+        const msg = new Message();
+        msg.set('username', user.get('username'));
+        msg.set('text', text);
+        try {
+            await msg.save();
+            input.value = '';
+        } catch(err) { alert('Gagal kirim: ' + err.message); }
+    }
+
+    // === INFAK ===
+    async function loadInfak() {
+        const user = Parse.User.current();
+        const Infak = Parse.Object.extend('Infak');
+        const query = new Parse.Query(Infak);
+        query.equalTo('userId', user.id);
+        query.descending('createdAt');
+        try {
+            const results = await query.find();
+            const container = document.getElementById('infakRiwayat');
+            if (results.length === 0) { container.innerHTML = '<div class="empty">Belum ada riwayat infak.</div>'; return; }
+            let html = '';
+            results.forEach(r => {
+                html += `<div class="infak-item">
+                            <div><strong>${escapeHtml(r.get('bulan'))}</strong><br><small>${new Date(r.createdAt).toLocaleDateString('id-ID')}</small></div>
+                            <div style="color:var(--gold); font-weight:bold;">Rp ${r.get('nominal').toLocaleString('id-ID')}</div>
+                         </div>`;
+            });
+            container.innerHTML = html;
+        } catch(e) { console.error(e); }
+    }
+
+    document.getElementById('submitInfakBtn').addEventListener('click', async () => {
+        const bulan = document.getElementById('infakBulan').value;
+        const nominal = parseInt(document.getElementById('infakNominal').value);
+        if (!bulan || isNaN(nominal) || nominal <= 0) return alert('Data tidak valid');
+        const user = Parse.User.current();
+        const Infak = Parse.Object.extend('Infak');
+        const infak = new Infak();
+        infak.set('userId', user.id);
+        infak.set('username', user.get('username'));
+        infak.set('bulan', bulan);
+        infak.set('nominal', nominal);
+        try {
+            await infak.save();
+            document.getElementById('infakMessage').innerHTML = '<span style="color:green">✅ Tersimpan!</span>';
+            document.getElementById('infakBulan').value = '';
+            document.getElementById('infakNominal').value = '';
+            loadInfak();
+            loadDashboardStats(); // refresh total infak
+        } catch(err) { alert('Gagal: ' + err.message); }
+    });
+
+    // === PENGUMUMAN ===
+    async function loadPengumuman() {
+        const user = Parse.User.current();
+        const Announcement = Parse.Object.extend('Announcement');
+        const q1 = new Parse.Query(Announcement); q1.equalTo('forAll', true);
+        const q2 = new Parse.Query(Announcement); q2.equalTo('targetUserId', user.id);
+        const query = Parse.Query.or(q1, q2);
+        query.descending('createdAt');
+        try {
+            const results = await query.find();
+            const container = document.getElementById('announcementList');
+            if (results.length === 0) { container.innerHTML = '<div class="empty">Belum ada pengumuman.</div>'; return; }
+            let html = '';
+            results.forEach(a => {
+                const date = new Date(a.createdAt).toLocaleDateString('id-ID', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+                html += `<div class="pengumuman-card">
+                            <h3 style="color:var(--gold);">${escapeHtml(a.get('title'))}</h3>
+                            <p>${escapeHtml(a.get('description'))}</p>
+                            <div style="font-size:0.8rem; color:#94a3b8; margin-top:0.5rem;">👤 ${escapeHtml(a.get('createdBy'))} | 📅 ${date}</div>
+                         </div>`;
+            });
+            container.innerHTML = html;
+        } catch(e) { console.error(e); }
+    }
+
+    document.getElementById('createAnnouncementBtn').addEventListener('click', async () => {
+        const title = document.getElementById('annTitle').value.trim();
+        const desc = document.getElementById('annDesc').value.trim();
+        const target = document.getElementById('annTarget').value;
+        if (!title || !desc) return alert('Lengkapi judul dan isi');
+        const user = Parse.User.current();
+        const Announcement = Parse.Object.extend('Announcement');
+        const ann = new Announcement();
+        ann.set('title', title);
+        ann.set('description', desc);
+        ann.set('createdBy', user.get('username'));
+        ann.set('forAll', (target === 'all'));
+        ann.set('targetUserId', (target === 'all' ? null : user.id));
+        try {
+            await ann.save();
+            document.getElementById('annMessage').innerHTML = '<span style="color:green">✅ Terkirim!</span>';
+            document.getElementById('annTitle').value = '';
+            document.getElementById('annDesc').value = '';
+            loadPengumuman();
+            loadDashboardStats();
+        } catch(err) { alert('Gagal: ' + err.message); }
+    });
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>"']/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            if (m === '"') return '&quot;';
+            if (m === "'") return '&#039;';
+            return m;
+        });
+    }
+
+    (async () => {
+        const user = Parse.User.current();
+        if (user) { currentUser = user; showDashboard(); }
+    })();
+</script>
+</body>
+  </html>
