@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infak - Ponpes Al Kautsar</title>
+    <style>
+        body { font-family: Arial; background: #eef2f7; padding: 20px; margin:0; }
+        .container { max-width: 700px; margin: auto; background: white; border-radius: 28px; padding: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #1e2a47; }
+        input, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 40px; border: 1px solid #ccc; font-size: 16px; }
+        button { background: #1e2a47; color: white; font-weight: bold; cursor: pointer; }
+        .logout-btn { background: #e67e22; margin-top: 0; }
+        .infak-item { background: #f8f9fa; margin: 10px 0; padding: 12px; border-radius: 20px; }
+        .infak-item span { font-weight: bold; }
+        .nav-links { text-align: center; margin-bottom: 20px; }
+        .nav-links a { margin: 0 10px; text-decoration: none; color: #1e2a47; font-weight: bold; }
+        hr { margin: 20px 0; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="nav-links">
+        <a href="index.html">💬 Chat</a> | 
+        <a href="infak.html">💰 Infak</a>
+    </div>
+    <h2>💰 Infak Bulanan</h2>
+    <div id="userInfo" style="text-align:center; margin-bottom:15px;"></div>
+
+    <div id="formArea">
+        <label>Bulan (YYYY-MM):</label>
+        <input type="month" id="bulan" required>
+        <label>Nominal (Rp):</label>
+        <input type="number" id="nominal" placeholder="Minimal 1" required>
+        <button onclick="submitInfak()">Kirim Infak</button>
+        <div id="message" style="text-align:center; margin-top:10px; color:green;"></div>
+    </div>
+
+    <hr>
+    <h3>Riwayat Infak Saya</h3>
+    <div id="riwayat"></div>
+
+    <button class="logout-btn" onclick="logout()">Keluar</button>
+</div>
+
+<script src="https://unpkg.com/parse@3.4.0/dist/parse.min.js"></script>
+<script>
+    Parse.initialize("PUkWc1q1w6G9LObKVAM8vaZysalll29RGM6hUsCN", "rYurvOuqkeJzJZfT1Tq1X5UmbSQHC6StID85xCu7");
+    Parse.serverURL = "https://parseapi.back4app.com/";
+
+    let currentUser = null;
+
+    // Cek login
+    async function checkLogin() {
+        const user = Parse.User.current();
+        if (!user) {
+            alert("Anda belum login. Silakan login dulu di halaman Chat.");
+            window.location.href = "index.html";
+            return;
+        }
+        currentUser = user;
+        document.getElementById("userInfo").innerHTML = `👤 ${user.get("username")}`;
+        await loadRiwayat();
+    }
+
+    // Submit infak
+    async function submitInfak() {
+        const bulan = document.getElementById("bulan").value;
+        const nominal = parseInt(document.getElementById("nominal").value);
+        if (!bulan || isNaN(nominal) || nominal <= 0) {
+            alert("Isi bulan dan nominal yang benar (minimal Rp1)");
+            return;
+        }
+        const msgDiv = document.getElementById("message");
+        msgDiv.innerText = "Menyimpan...";
+        
+        // Cek apakah sudah pernah infak bulan ini
+        const Infak = Parse.Object.extend("Infak");
+        const query = new Parse.Query(Infak);
+        query.equalTo("userId", currentUser.id);
+        query.equalTo("bulan", bulan);
+        const existing = await query.first();
+        if (existing) {
+            msgDiv.innerText = "❌ Anda sudah mengisi infak untuk bulan ini.";
+            return;
+        }
+        
+        // Simpan
+        const infak = new Infak();
+        infak.set("userId", currentUser.id);
+        infak.set("username", currentUser.get("username"));
+        infak.set("bulan", bulan);
+        infak.set("nominal", nominal);
+        try {
+            await infak.save();
+            msgDiv.innerText = "✅ Infak berhasil disimpan. Terima kasih!";
+            document.getElementById("bulan").value = "";
+            document.getElementById("nominal").value = "";
+            await loadRiwayat();
+        } catch (err) {
+            msgDiv.innerText = "❌ Gagal: " + err.message;
+        }
+    }
+
+    // Load riwayat infak user
+    async function loadRiwayat() {
+        const Infak = Parse.Object.extend("Infak");
+        const query = new Parse.Query(Infak);
+        query.equalTo("userId", currentUser.id);
+        query.descending("bulan");
+        const results = await query.find();
+        const container = document.getElementById("riwayat");
+        if (results.length === 0) {
+            container.innerHTML = "<p>Belum ada infak.</p>";
+            return;
+        }
+        let html = "";
+        for (let item of results) {
+            html += `<div class="infak-item"><span>${item.get("bulan")}</span> → Rp ${item.get("nominal").toLocaleString()}</div>`;
+        }
+        container.innerHTML = html;
+    }
+
+    async function logout() {
+        await Parse.User.logOut();
+        window.location.href = "index.html";
+    }
+
+    window.onload = checkLogin;
+</script>
+</body>
+  </html>
